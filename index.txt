@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة الحملات التسويقية | Marketing Campaigns</title>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f4f7f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+    header {
+      background-color: #28a745;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 22px;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: #e9ecef;
+      padding: 10px;
+      flex-wrap: wrap;
+    }
+    nav button {
+      background-color: #007bff;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    nav button:hover { background-color: #0056b3; }
+    section {
+      display: none;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    section.active { display: block; }
+    h2 {
+      text-align: center;
+      color: #28a745;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      text-align: center;
+      padding: 8px;
+    }
+    th {
+      background-color: #28a745;
+      color: white;
+    }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    button.action {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+    }
+    .edit { background-color: #007bff; }
+    .delete { background-color: #dc3545; }
+    .save { background-color: #28a745; }
+    .export { background-color: #17a2b8; }
+    .import { background-color: #ffc107; color: black; }
+    .progress-container {
+      width: 100%;
+      background: #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 10px 0;
+      display: none;
+    }
+    .progress-bar {
+      height: 10px;
+      width: 0;
+      background: #28a745;
+      transition: width 0.3s;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 10px;
+      color: #555;
+      background: #f1f3f5;
+    }
+  </style>
+</head>
+<body>
+  <header>📊 إدارة الحملات التسويقية | Marketing Campaigns</header>
+  <nav>
+    <button onclick="showSection('manage')">إدارة الحملات</button>
+    <button onclick="showSection('analysis')">تحليل الحملات</button>
+    <button onclick="showSection('reports')">التقارير</button>
+    <button onclick="showSection('backup')">النسخ الاحتياطي</button>
+  </nav>
+
+  <section id="manage" class="active">
+    <h2>إدارة الحملات</h2>
+    <label>اسم الحملة</label>
+    <input type="text" id="campaignName" placeholder="أدخل اسم الحملة">
+
+    <label>الوصف</label>
+    <textarea id="campaignDesc" placeholder="أدخل وصف الحملة"></textarea>
+
+    <label>روابط URLs</label>
+    <input type="text" id="campaignLinks" placeholder="أدخل حتى 5 روابط مفصولة بفاصلة">
+
+    <label>رفع صور</label>
+    <input type="file" id="imageFiles" accept="image/*" multiple>
+    <div class="progress-container"><div class="progress-bar" id="imageProgress"></div></div>
+
+    <label>رفع فيديوهات</label>
+    <input type="file" id="videoFiles" accept="video/*" multiple>
+    <div class="progress-container"><div class="progress-bar" id="videoProgress"></div></div>
+
+    <label>رفع ملفات</label>
+    <input type="file" id="docFiles" multiple>
+    <div class="progress-container"><div class="progress-bar" id="docProgress"></div></div>
+
+    <button class="save" onclick="saveCampaign()">💾 حفظ الحملة</button>
+
+    <h3>قائمة الحملات</h3>
+    <input type="text" id="searchBox" placeholder="🔍 بحث عن حملة بالاسم">
+    <table id="campaignTable">
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>الوصف</th>
+          <th>عدد الصور</th>
+          <th>عدد الفيديوهات</th>
+          <th>عدد الملفات</th>
+          <th>خيارات</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="analysis">
+    <h2>📈 تحليل الحملات</h2>
+    <canvas id="barChart" style="width:100%;max-width:600px"></canvas>
+    <canvas id="pieChart" style="width:100%;max-width:600px"></canvas>
+  </section>
+
+  <section id="reports">
+    <h2>📄 تقارير الحملات</h2>
+    <button class="export" onclick="exportPDF()">تصدير PDF</button>
+    <button class="export" onclick="exportExcel()">تصدير Excel</button>
+    <button class="export" onclick="exportCSV()">تصدير CSV</button>
+    <table id="reportTable">
+      <thead>
+        <tr>
+          <th>اسم الحملة</th>
+          <th>الوصف</th>
+          <th>روابط</th>
+          <th>صور</th>
+          <th>فيديوهات</th>
+          <th>ملفات</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="backup">
+    <h2>💾 النسخ الاحتياطي</h2>
+    <button class="export" onclick="downloadBackup()">تنزيل النسخة الاحتياطية (JSON)</button>
+    <label>استعادة النسخة</label>
+    <input type="file" id="restoreFile" onchange="restoreBackup(event)">
+  </section>
+
+  <footer>© 2025 إدارة الحملات التسويقية – جميع الحقوق محفوظة</footer>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    let campaigns = JSON.parse(localStorage.getItem('campaigns') || '[]');
+    let editIndex = null;
+
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (id === 'analysis') renderCharts();
+      if (id === 'reports') renderReports();
+    }
+
+    // Progress bar utility
+    function simulateProgress(barId, callback) {
+      const bar = document.getElementById(barId);
+      const container = bar.parentElement;
+      container.style.display = 'block';
+      let width = 0;
+      const interval = setInterval(() => {
+        width += 10;
+        bar.style.width = width + '%';
+        if (width >= 100) {
+          clearInterval(interval);
+          setTimeout(() => { container.style.display = 'none'; bar.style.width = '0%'; }, 500);
+          if (callback) callback();
+        }
+      }, 100);
+    }
+
+    // Save Campaign
+    function saveCampaign() {
+      const name = document.getElementById('campaignName').value.trim();
+      const desc = document.getElementById('campaignDesc').value.trim();
+      const links = document.getElementById('campaignLinks').value.split(',').map(l => l.trim()).filter(l => l);
+      if (!name) return alert('يرجى إدخال اسم الحملة');
+
+      const campaign = { name, desc, links, images: [], videos: [], docs: [] };
+
+      const imgFiles = document.getElementById('imageFiles').files;
+      const vidFiles = document.getElementById('videoFiles').files;
+      const docFiles = document.getElementById('docFiles').files;
+
+      const readFiles = (files, arr, barId, done) => {
+        if (files.length === 0) return done();
+        simulateProgress(barId, () => {});
+        let loaded = 0;
+        [...files].slice(0, 5).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            arr.push({ name: file.name, data: e.target.result });
+            loaded++;
+            if (loaded === Math.min(files.length, 5)) done();
+          };
+          reader.readAsDataURL(file);
+        });
+      };
+
+      readFiles(imgFiles, campaign.images, 'imageProgress', () => {
+        readFiles(vidFiles, campaign.videos, 'videoProgress', () => {
+          readFiles(docFiles, campaign.docs, 'docProgress', () => {
+            if (editIndex !== null) {
+              campaigns[editIndex] = campaign;
+              editIndex = null;
+            } else {
+              campaigns.push(campaign);
+            }
+            localStorage.setItem('campaigns', JSON.stringify(campaigns));
+            alert('تم حفظ الحملة بنجاح');
+            clearForm();
+            renderTable();
+          });
+        });
+      });
+    }
+
+    function clearForm() {
+      document.getElementById('campaignName').value = '';
+      document.getElementById('campaignDesc').value = '';
+      document.getElementById('campaignLinks').value = '';
+      document.getElementById('imageFiles').value = '';
+      document.getElementById('videoFiles').value = '';
+      document.getElementById('docFiles').value = '';
+    }
+
+    function renderTable() {
+      const tbody = document.querySelector('#campaignTable tbody');
+      tbody.innerHTML = '';
+      const search = document.getElementById('searchBox').value.toLowerCase();
+      campaigns.filter(c => c.name.toLowerCase().includes(search)).forEach((c, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${c.name}</td>
+          <td>${c.desc}</td>
+          <td>${c.images.length}</td>
+          <td>${c.videos.length}</td>
+          <td>${c.docs.length}</td>
+          <td>
+            <button class="action edit" onclick="editCampaign(${i})">تعديل</button>
+            <button class="action delete" onclick="deleteCampaign(${i})">حذف</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editCampaign(index) {
+      const c = campaigns[index];
+      document.getElementById('campaignName').value = c.name;
+      document.getElementById('campaignDesc').value = c.desc;
+      document.getElementById('campaignLinks').value = c.links.join(', ');
+      editIndex = index;
+      showSection('manage');
+    }
+
+    function deleteCampaign(index) {
+      if (confirm('هل تريد حذف هذه الحملة؟')) {
+        campaigns.splice(index, 1);
+        localStorage.setItem('campaigns', JSON.stringify(campaigns));
+        renderTable();
+      }
+    }
+
+    document.getElementById('searchBox').addEventListener('input', renderTable);
+
+    // Reports
+    function renderReports() {
+      const tbody = document.querySelector('#reportTable tbody');
+      tbody.innerHTML = '';
+      campaigns.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${c.name}</td>
+          <td>${c.desc}</td>
+          <td>${c.links.length}</td>
+          <td>${c.images.length}</td>
+          <td>${c.videos.length}</td>
+          <td>${c.docs.length}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Export
+    async function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("تقارير الحملات التسويقية", 10, 10);
+      let y = 20;
+      campaigns.forEach(c => {
+        doc.text(`${c.name} - ${c.desc}`, 10, y);
+        y += 10;
+      });
+      doc.save("campaigns_report.pdf");
+    }
+
+    function exportExcel() {
+      const data = campaigns.map(c => ({
+        name: c.name,
+        description: c.desc,
+        links: c.links.length,
+        images: c.images.length,
+        videos: c.videos.length,
+        files: c.docs.length
+      }));
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Campaigns");
+      XLSX.writeFile(wb, "campaigns.xlsx");
+    }
+
+    function exportCSV() {
+      const csv = ["name,description,links,images,videos,files"];
+      campaigns.forEach(c => csv.push(`${c.name},${c.desc},${c.links.length},${c.images.length},${c.videos.length},${c.docs.length}`));
+      const blob = new Blob([csv.join("\n")], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "campaigns.csv";
+      a.click();
+    }
+
+    // Charts
+    function renderCharts() {
+      const ctxBar = document.getElementById('barChart');
+      const ctxPie = document.getElementById('pieChart');
+      const labels = campaigns.map(c => c.name);
+      const imgData = campaigns.map(c => c.images.length);
+      const vidData = campaigns.map(c => c.videos.length);
+      const docData = campaigns.map(c => c.docs.length);
+
+      new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label: 'الصور', data: imgData, backgroundColor: '#28a745' },
+            { label: 'الفيديوهات', data: vidData, backgroundColor: '#17a2b8' },
+            { label: 'الملفات', data: docData, backgroundColor: '#ffc107' }
+          ]
+        }
+      });
+
+      const totalImgs = imgData.reduce((a,b)=>a+b,0);
+      const totalVids = vidData.reduce((a,b)=>a+b,0);
+      const totalDocs = docData.reduce((a,b)=>a+b,0);
+      new Chart(ctxPie, {
+        type: 'pie',
+        data: {
+          labels: ['صور', 'فيديوهات', 'ملفات'],
+          datasets: [{
+            data: [totalImgs, totalVids, totalDocs],
+            backgroundColor: ['#28a745','#17a2b8','#ffc107']
+          }]
+        }
+      });
+    }
+
+    // Backup
+    function downloadBackup() {
+      const blob = new Blob([JSON.stringify(campaigns)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'campaigns_backup.json';
+      a.click();
+    }
+
+    function restoreBackup(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        campaigns = JSON.parse(ev.target.result);
+        localStorage.setItem('campaigns', JSON.stringify(campaigns));
+        alert('تمت استعادة النسخة الاحتياطية بنجاح');
+        renderTable();
+      };
+      reader.readAsText(file);
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
